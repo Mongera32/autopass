@@ -6,4 +6,5 @@ def main(cmd = 'getpw'):
     operation_manager(cmd)
 
 if __name__ == "__main__":
-    main()
+    cmd = input('input command: ')
+    main(cmd)
