@@ -1,0 +1,7 @@
+pandas
+ccrypt
+random 
+string
+pyperclip
+getpass
+subprocess
