@@ -2,7 +2,7 @@
 
 local cryptographed password vault. 
 
-To set it up, you must first call main('encrypt') to encrypt the vault.
+To set it up, you must first call main with the "encrypt" command to encrypt the vault.
 
 After that, call main(cmd), where cmd is a string with one of the following commands:
 
