@@ -3,11 +3,11 @@ import subprocess
 import getpass
 
 def get_key():
-    key = getpass.getpass(prompt='Encryption key: ', stream=None)
+    key = getpass.getpass(prompt='Please input your encryption key: ', stream=None)
     return key
 
 def get_login():
-    login = getpass.getpass(prompt='login: ', stream=None)
+    login = getpass.getpass(prompt='Please input the desired login name: ', stream=None)
     return login
 
 def decrypt_csv(key):
