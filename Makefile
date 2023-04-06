@@ -6,4 +6,4 @@ vault.csv.cpt: vault.csv
   $(shell COMMAND)
 
 requirements:
-  pip install requirements.txt
+  pip install -r requirements.txt
