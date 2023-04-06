@@ -1,9 +1,12 @@
 # autopass
+
 local cryptographed password vault. 
 
-to use for the first time, you must first call main('encrypt') to encrypt the vault.
+To set it up, you must first call main('encrypt') to encrypt the vault.
 
-to use, call main(cmd), where cmd is a string with one of the following commands:
+After that, call main(cmd), where cmd is a string with one of the following commands:
+
+## commands:
 
 "encrypt" - encrypts the password vault (vault.csv).
 
