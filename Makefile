@@ -1,9 +1,7 @@
-COMMAND = $(ccencrypt vault.csv)
-
-default: requirements, vault.csv.cpt
+default: req vault.csv.cpt
 
 vault.csv.cpt: vault.csv
-  $(shell COMMAND)
+	$(shell ccencrypt vault.csv)
 
-requirements:
-  pip install -r requirements.txt
+req:
+	pip install -r requirements.txt
