@@ -20,7 +20,7 @@ def get_login():
     service = input(prompt='Please input your login associated to the service (example: Victor.silva@gmail.com): ')
     return service 
 
-def service_name():
+def get_service():
     login = input(prompt='Please input the name of the service that want to save your password for (example: e-mail): ')
     return login
 
