@@ -2,7 +2,7 @@
 import subprocess
 import getpass
 
-def get_key(timid = False):
+def get_key(timid = True):
 
     key1=0
     key2=1
