@@ -17,7 +17,7 @@ def get_key(timid = True):
     
 
 def get_login():
-    login = getpass.getpass(prompt='Please input the desired login name: ', stream=None)
+    login = input(prompt='Please input the desired login name: ')
     return login
 
 def decrypt_csv(key):
