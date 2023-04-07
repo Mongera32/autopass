@@ -2,9 +2,19 @@
 import subprocess
 import getpass
 
-def get_key():
-    key = getpass.getpass(prompt='Please input your encryption key: ', stream=None)
-    return key
+def get_key(timid = False):
+
+    key1=0
+    key2=1
+    while key1!=key2:
+    
+        key1 = getpass.getpass(prompt='Please input your encryption key: ', stream=None)
+
+        if timid: key2 = getpass.getpass(prompt='Warning: If you forget your key, the passwords inside the vault will be lost! Please confirm your key: ', stream=None)
+        else: key2 = key1
+
+    return key1
+    
 
 def get_login():
     login = getpass.getpass(prompt='Please input the desired login name: ', stream=None)
