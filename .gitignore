@@ -2,3 +2,4 @@ vault.csv.cpt
 vault.csv
 .ipynb_checkpoints
 __pycache__
+plugins/__pycache__
