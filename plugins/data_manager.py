@@ -61,7 +61,9 @@ def addpw(login):
 
 def operation_manager(cmd = 'getpw'):
 
-    key = get_key()
+    if cmd='encrypt': timid=True
+    else: timid = False
+    key = get_key(timid)
 
     if cmd == 'encrypt':
         encrypt_csv(key)
