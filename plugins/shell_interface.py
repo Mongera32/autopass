@@ -1,5 +1,7 @@
 # Importing required module
 import subprocess
+# import required module
+import bcrypt
 import getpass
 
 def get_key(timid = True):
@@ -32,6 +34,18 @@ def decrypt_csv(key):
         print('File not found. Please check if it is encrypted and in the current directory')
         return False
 
+
+def ferencrypt(key):
+    f = Fernet(key)
+    with open('vault.csv', "rb") as file:
+        # read the encrypted data
+        file_data = file.read()
+    # encrypt data
+    encrypted_data = f.encrypt(file_data)
+    # write the encrypted file
+    with open('vault.csv', "wb") as file:
+        file.write(encrypted_data)
+
 def encrypt_csv(key):
     try:
         subprocess.run(f'ccencrypt --key {key} vault.csv', shell=True)
@@ -39,3 +53,5 @@ def encrypt_csv(key):
     except:
         print('File not found. Please check if it is decrypted and in the current directory')
         return False
+
+ferencrypt('nhf8923hf89233f2io')
