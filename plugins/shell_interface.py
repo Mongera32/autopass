@@ -1,7 +1,7 @@
 # Importing required module
 import subprocess
 # import required module
-import bcrypt
+from cryptography.fernet import Fernet
 import getpass
 
 def get_key(timid = True):
@@ -34,17 +34,47 @@ def decrypt_csv(key):
         print('File not found. Please check if it is encrypted and in the current directory')
         return False
 
+def encryptFile(key, in_filename, out_filename=None, chunksize=64*1024):
+    """ Encrypts a file using AES (CBC mode) with the
+        given key.
 
-def ferencrypt(key):
-    f = Fernet(key)
-    with open('vault.csv', "rb") as file:
-        # read the encrypted data
-        file_data = file.read()
-    # encrypt data
-    encrypted_data = f.encrypt(file_data)
-    # write the encrypted file
-    with open('vault.csv', "wb") as file:
-        file.write(encrypted_data)
+        key:
+            The encryption key - a string that must be
+            either 16, 24 or 32 bytes long. Longer keys
+            are more secure.
+
+        in_file:
+            Input file
+
+        out_file:
+            If None, a StringIO will be returned.
+
+        chunksize:
+            Sets the size of the chunk which the function
+            uses to read and encrypt the file. Larger chunk
+            sizes can be faster for some files and machines.
+            chunksize must be divisible by 16.
+    """
+    if not out_filename:
+        out_filename = in_filename + '.enc'
+
+    iv = ''.join(chr(random.randint(0, 0xFF)) for i in range(16))
+    encryptor = AES.new(key, AES.MODE_CBC, iv)
+    filesize = os.path.getsize(in_filename)
+
+    with open(in_filename, 'rb') as infile:
+        with open(out_filename, 'wb') as outfile:
+            outfile.write(struct.pack('<Q', filesize))
+            outfile.write(iv)
+
+            while True:
+                chunk = infile.read(chunksize)
+                if len(chunk) == 0:
+                    break
+                elif len(chunk) % 16 != 0:
+                    chunk += ' ' * (16 - len(chunk) % 16)
+
+                outfile.write(encryptor.encrypt(chunk))
 
 def encrypt_csv(key):
     try:
