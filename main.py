@@ -1,5 +1,5 @@
 from plugins.data_manager import operation_manager
-from plugins.shell_interface import encrypt_csv, decrypt_csv
+from plugins.encryption import encrypt_csv, decrypt_csv
 
 def main(cmd = 'getpw'):
 

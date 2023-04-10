@@ -1,7 +1,7 @@
 from plugins.pandas_functions import search_login, read_file, check_for_duplicates
 import pyperclip
 from plugins.randomizer import random_sequence
-from plugins.shell_interface import encrypt_csv, get_key, get_login, decrypt_csv
+from plugins.encryption import encrypt_csv, get_key, get_login, decrypt_csv
 
 def getpw(login):
     """fecthes a password from vault"""
