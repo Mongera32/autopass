@@ -1,8 +1,39 @@
 # Importing required module
 import subprocess
 # import required module
-import bcrypt
 import getpass
+import hashlib
+import base64
+from cryptography.fernet import Fernet
+
+def string_encrypt(message, password):
+    # Define the password and salt
+    password = b"password"
+    salt = b"my_salt"
+
+    # Use PBKDF2 to derive the key from the password and salt
+    kdf = hashlib.pbkdf2_hmac("sha256", password, salt, 100000)
+
+    # Use the derived key to create a Fernet object
+    key = base64.urlsafe_b64encode(kdf)
+    fernet = Fernet(key)
+
+    # Define the string to be encrypted
+    message = "This is a secret message"
+
+    # Convert the string to bytes
+    message_bytes = message.encode()
+
+    # Encrypt the bytes using Fernet
+    encrypted_bytes = fernet.encrypt(message_bytes)
+
+    # Convert the encrypted bytes to a string
+    encrypted_message = encrypted_bytes.decode()
+
+    print("Original message:", message)
+    print("Encrypted message:", encrypted_message)
+
+    return password, salt, encrypted_message
 
 def get_key(timid = True):
 
@@ -55,3 +86,6 @@ def encrypt_csv(key):
         return False
 
 ferencrypt('nhf8923hf89233f2io')
+
+if __name__ == "__main__":
+    string_encrypt("meu texto secreto", "minha senha")
