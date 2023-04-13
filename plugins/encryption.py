@@ -1,6 +1,7 @@
 import base64
 from cryptography.fernet import Fernet
 import hashlib
+import pandas as pd
 
 def fernet_gen(master_pw:str):
     """Derives a fernet key from "password" string, instantiates a "fernet" object and then returns this object. """
@@ -53,8 +54,7 @@ def string_decrypt(enc_message, master_pw:str):
     return message
 
 def columns_encrypt(df, master_pw:str):
-
-    #turn into bytes
+    """Encrypts all values in the DataFrame "df" and updates them"""
 
     # decrypting columns
     df["login"] = df["login"].apply(string_encrypt,args=(master_pw,))
@@ -63,6 +63,8 @@ def columns_encrypt(df, master_pw:str):
     return df
 
 def columns_decrypt(df, master_pw):
+    """Decrypts all values in the DataFrame "df" and updates them"""
+
     # decrypting columns
     df["login"] = df["login"].apply(string_decrypt,args=(master_pw,))
     df["password"] = df["password"].apply(string_decrypt,args=(master_pw,))
@@ -70,10 +72,15 @@ def columns_decrypt(df, master_pw):
     return df
 
 if __name__ == "__main__":
-    login = 'meunome'
-    master_pw = 'senhasenhasenha'
-    encoded = string_encrypt(login,master_pw)
-    print(encoded)
-    decoded = string_decrypt(encoded, master_pw)
-    print(decoded)
-    print(decoded == login)
+    df = pd.read_csv('vault.csv', sep = " ")
+    master_pw = 'senhasenha'
+    df_original = df.copy()
+
+    print(df_original)
+
+    columns_encrypt(df,master_pw)
+    print(df)
+
+    columns_decrypt(df, master_pw)
+
+    print(df_original == df)
