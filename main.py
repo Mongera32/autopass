@@ -1,4 +1,4 @@
-from plugins.data_manager import operation_manager
+from plugins.vault_manager import operation_manager
 from plugins.encryption import encrypt_csv, decrypt_csv
 
 def main(cmd = 'getpw'):

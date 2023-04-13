@@ -1,12 +1,18 @@
 import pandas as pd
-from plugins.randomizer import random_sequence
 
 def read_file():
     """reads the csv file and returns a dataframe"""
     return pd.read_csv('vault.csv', sep = " ")
 
+def search_index(login):
+    """Identifies the index in a df corresponding to the passed login"""
+
+    index = search_login(login).index[0]
+
+    return index
+
 def search_login(login):
-    """returns row corresponding to given login"""
+    """returns row that contains the given login"""
 
     df = read_file()
     filter = df['login'] == login
@@ -36,4 +42,29 @@ def pandas_concat(new_row):
     original_df = read_file()
 
     pd.concat([new_row, original_df], axis=0, ignore_index=True)
+    return None
+
+def update_df(index, login, df, password):
+    """
+    Inserts a row in a DataFrame or updates an existing row \n
+    - index: \n
+    Index of the row to be updated. Must be equal to the length of the DataFrame ( len(df) ) for this function to insert a new row. \n
+
+    - login \n
+    Login associated to the password \n
+
+    - df \n
+    Dataframe extracted from vault.csv \n
+
+    - password \n
+    Password to be inserted. \n
+    """
+
+    df.at[index,'login'] = login
+    df.at[index,'password'] = password
+
+    if check_for_duplicates(login,df):
+        print('duplicate login found. Dataframe not updated')
+        return None
+    df.to_csv(path_or_buf = 'vault.csv', index = False, sep = " ")
     return None

@@ -1,20 +1,16 @@
 import base64
-import getpass
 from cryptography.fernet import Fernet
-import os
 import hashlib
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-def fernet_gen(password:str):
+def fernet_gen(master_pw:str):
     """Derives a fernet key from "password" string, instantiates a "fernet" object and then returns this object. """
 
     # Define the password and salt
-    password = password.encode()
+    master_pw = master_pw.encode()
     salt = b"my_salt"
 
     # Use PBKDF2 to derive the key from the password and salt
-    kdf = hashlib.pbkdf2_hmac("sha256", password, salt, 100000)
+    kdf = hashlib.pbkdf2_hmac("sha256", master_pw, salt, 100000)
 
     # Use the derived key to create a Fernet object
     key = base64.urlsafe_b64encode(kdf)
@@ -24,8 +20,7 @@ def fernet_gen(password:str):
 
 def string_encrypt(message:str, master_pw:str):
     """
-    Calls input_pw to get user's password.
-    Encrypts "massage" using a fernet key derived from the given password.
+    Encrypts "massage" using a fernet key derived from the given master password.
     """
 
     # getting user master password imput with confirmation
@@ -42,10 +37,9 @@ def string_encrypt(message:str, master_pw:str):
 
     return enc_message
 
-def string_decrypt(enc_message:str,master_pw):
+def string_decrypt(enc_message, master_pw:str):
     """
-    Calls input_pw to get user's password. \n
-    Decrypts "enc_massage" using a fernet key derived from the given password.
+    Decrypts "enc_massage" using a fernet key derived from the given master password.
     """
 
     # generate fernet object from password
@@ -58,26 +52,28 @@ def string_decrypt(enc_message:str,master_pw):
 
     return message
 
-def input_pw(timid = True):
-    """
-    Asks user for a hidden "master password" imput and returns the password. \n
-    Set "Timid = True" to ask user for a confirmation of the password.
-    """
+def columns_encrypt(df, master_pw:str):
 
-    # safe password imput
-    password = getpass.getpass(prompt='Please input your master password: ', stream=None)
+    #turn into bytes
 
-    # password confirmation if necessary
-    if timid:
-        confirmation = getpass.getpass(prompt='Please confirm your master password: ', stream=None)
+    # decrypting columns
+    df["login"] = df["login"].apply(string_encrypt,args=(master_pw,))
+    df["password"] = df["password"].apply(string_encrypt,args=(master_pw,))
 
-        while password!=confirmation:
-            password = getpass.getpass(prompt='Passwords do not match! Please input your master password again: ', stream=None)
-            confirmation = getpass.getpass(prompt='Please confirm your master password again: ', stream=None)
+    return df
 
-    return password
+def columns_decrypt(df, master_pw):
+    # decrypting columns
+    df["login"] = df["login"].apply(string_decrypt,args=(master_pw,))
+    df["password"] = df["password"].apply(string_decrypt,args=(master_pw,))
 
-
+    return df
 
 if __name__ == "__main__":
-    pass
+    login = 'meunome'
+    master_pw = 'senhasenhasenha'
+    encoded = string_encrypt(login,master_pw)
+    print(encoded)
+    decoded = string_decrypt(encoded, master_pw)
+    print(decoded)
+    print(decoded == login)
