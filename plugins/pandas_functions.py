@@ -9,7 +9,7 @@ def create_file():
 
     return df
 
-def read_file():
+def read_file() -> pd.DataFrame:
     """reads the csv file and returns a dataframe"""
     return pd.read_csv('vault.csv', sep = " ")
 
@@ -32,8 +32,13 @@ def search_login(login):
     row = df[filter]
     return row
 
-def check_for_duplicates(login, df):
-    """check if login appears on new dataframe more than once. Returns True if so."""
+def check_for_duplicates(login:str, df:pd.DataFrame):
+    """
+    check if login appears on the df more than once. Returns True if so.
+    DataFrame must be unencrypted
+    """
+
+    #getting first column
 
     filter = df['login'] == login
     if len(df[filter]) > 1:
@@ -73,13 +78,14 @@ def update_df(df:pd.DataFrame, index:int, login:str, password:str):
     Password to be inserted. \n
     """
 
-    df.at[index,'login'] = login
-    df.at[index,'password'] = password
+    #getting column values of the encrypted dataframe
+    col1 = df.columns[0]
+    col2 = df.columns[1]
 
-    if check_for_duplicates(login,df):
-        print('duplicate login found. Dataframe not updated')
-        return None
-    override_file(df)
+    #replacing or appending values to df
+    df.at[index,col1] = login
+    df.at[index,col2] = password
+
     return None
 
 if __name__ == "__main__":

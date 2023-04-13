@@ -5,7 +5,7 @@ from plugins.encryption import string_decrypt, string_encrypt, df_dec, df_enc
 from inputs import input_pw, input_login, input_service
 
 def getpw():
-    """fecthes a password from the encrypted vault"""
+    """fetches a password from the encrypted vault"""
 
     # asking for login and generating password
     master_pw = input_pw(timid=False)
@@ -16,11 +16,12 @@ def getpw():
 
     #decrypting columns
     df = df_dec(df,master_pw)
+    print(df)
+    print(type(df))
 
     # searching for correspondent password in the "password " column
     filter = df['login'] == login
     password = df[filter].iloc[0]['password']
-    password = password.strip('\'')
 
     pyperclip.copy(password)
 
@@ -57,6 +58,7 @@ def addpw():
     - Encrypts both and stores them in the vault \n
     - Sends generated password to clipboard
     """
+
     # retrieving dataframe from vault.csv
     df = read_file()
 
@@ -69,13 +71,16 @@ def addpw():
     # Aborts operation if master password is wrong
     if wrong_master_pw: return None
 
+
     # asking for login and generating password
-    master_pw = input_pw()
     login = input_login()
     password = random_sequence()
 
-    #encrypting DataFrame
-    df = df_enc(df)
+    # aborts operation if duplicates are found
+    check = check_for_duplicates(login,df)
+    if check:
+        print("duplicate login found. Aborting")
+        return None
 
     # updating the vault.csv file with an appended login and password
     update_df(df,
@@ -83,6 +88,12 @@ def addpw():
               login,
               password
 )
+    #encrypting DataFrame
+    df = df_enc(df,master_pw)
+
+    # updating vault.csv
+    override_file(df)
+
     # sending password to clipboard
     pyperclip.copy(password)
 
@@ -108,6 +119,14 @@ def lockvault():
 def unlockvault():
     """Decrypts all data in the vault.csv file"""
 
+    # confirmation
+    answer = input('You are about to decrypt all data in your vault, leaving it exposed should someone have access to your computer. Proceed anyways? [y/n]')
+    if answer != 'y':
+        print('Vault was not decrypted')
+        return None
+    else:
+        print('Proceeding with vault decryption')
+
     # read file
     df = read_file()
 
@@ -118,7 +137,10 @@ def unlockvault():
     df = df_dec(df,master_pw)
 
     # update vault.csv
-    override_file(df)
+    try: override_file(df)
+    except AttributeError:
+        print('Vault is empty. Nothing to unlock')
+        return None
 
     return None
 
@@ -155,4 +177,4 @@ def set_vault():
 
 
 if __name__ == "__main__":
-    set_vault()
+    unlockvault()

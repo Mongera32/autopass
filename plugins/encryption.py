@@ -38,7 +38,7 @@ def string_encrypt(message:str, master_pw:str):
 
     return enc_message
 
-def string_decrypt(enc_message, master_pw:str):
+def string_decrypt(enc_message:bytes, master_pw:str):
     """
     Decrypts "enc_massage" using a fernet key derived from the given master password.
     """
@@ -75,7 +75,7 @@ def df_enc(df:pd.DataFrame, master_pw:str) -> pd.DataFrame:
 
     return df
 
-def df_dec(df:pd.DataFrame, master_pw:str):
+def df_dec(df:pd.DataFrame, master_pw:str) -> pd.DataFrame:
     """
     Decrypts all values in the DataFrame "df" and updates them.
     If the master password input is wrong, displays a warning and returns the original encrypted df.
@@ -84,8 +84,10 @@ def df_dec(df:pd.DataFrame, master_pw:str):
     # decrypt column names
     enc_col1 = df.columns[0]
     enc_col2 = df.columns[1]
-    col1 = string_decrypt(enc_col1,master_pw)
-    col2 = string_decrypt(enc_col2,master_pw)
+    byte_enc_col1 = eval(enc_col1)
+    byte_enc_col2 = eval(enc_col2)
+    col1 = string_decrypt(byte_enc_col1,master_pw)
+    col2 = string_decrypt(byte_enc_col2,master_pw)
 
     # Checking if password is incorrect
     if (col1 != 'login' or col2 != 'password'):
@@ -98,6 +100,10 @@ def df_dec(df:pd.DataFrame, master_pw:str):
 
     #removing old columns
     df = df.drop(labels=[enc_col1,enc_col2], axis=1)
+
+    #turning values from string to bytes
+    df['login'] = df['login'].apply(lambda x : eval(x))
+    df['password'] = df['password'].apply(lambda x : eval(x))
 
     # decrypting columns
     df['login'] = df['login'].apply(string_decrypt,args=(master_pw,))

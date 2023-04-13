@@ -3,7 +3,9 @@ from plugins.encryption import encrypt_csv, decrypt_csv
 
 def main(cmd = 'getpw'):
 
-    operation_manager(cmd)
+    # check if vault.csv exists
+    # create vault.csv if it doesnt't exist
+    pass
 
 if __name__ == "__main__":
     cmd = input('input command: ')
