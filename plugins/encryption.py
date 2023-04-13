@@ -53,7 +53,7 @@ def string_decrypt(enc_message, master_pw:str):
 
     return message
 
-def columns_encrypt(df:pd.DataFrame, master_pw:str):
+def df_enc(df:pd.DataFrame, master_pw:str) -> pd.DataFrame:
     """Encrypts all heads and values in the DataFrame "df" and updates them"""
 
     # Encrypting column names
@@ -75,7 +75,7 @@ def columns_encrypt(df:pd.DataFrame, master_pw:str):
 
     return df
 
-def columns_decrypt(df:pd.DataFrame, master_pw:str):
+def df_dec(df:pd.DataFrame, master_pw:str):
     """
     Decrypts all values in the DataFrame "df" and updates them.
     If the master password input is wrong, displays a warning and returns the original encrypted df.
@@ -87,10 +87,10 @@ def columns_decrypt(df:pd.DataFrame, master_pw:str):
     col1 = string_decrypt(enc_col1,master_pw)
     col2 = string_decrypt(enc_col2,master_pw)
 
-    # Checking if password is correct
+    # Checking if password is incorrect
     if (col1 != 'login' or col2 != 'password'):
         print('Master password is incorrect')
-        return df
+        return df, True
 
     #creating columns with decrypted heads
     df['login'] = df[enc_col1]
@@ -103,7 +103,7 @@ def columns_decrypt(df:pd.DataFrame, master_pw:str):
     df['login'] = df['login'].apply(string_decrypt,args=(master_pw,))
     df['password'] = df['password'].apply(string_decrypt,args=(master_pw,))
 
-    return df
+    return df, False
 
 if __name__ == "__main__":
     pass

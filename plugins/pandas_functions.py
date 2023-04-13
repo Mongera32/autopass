@@ -1,8 +1,21 @@
 import pandas as pd
 
+def create_file():
+    """Creates a vault.csv file in the correct format"""
+
+    template = {'login':[], 'password':[]}
+
+    df = pd.DataFrame(template)
+
+    return df
+
 def read_file():
     """reads the csv file and returns a dataframe"""
     return pd.read_csv('vault.csv', sep = " ")
+
+def override_file(df:pd.DataFrame):
+    df.to_csv(path_or_buf = 'vault.csv', index = False, sep = " ")
+    return None
 
 def search_index(login):
     """Identifies the index in a df corresponding to the passed login"""
@@ -44,7 +57,7 @@ def pandas_concat(new_row):
     pd.concat([new_row, original_df], axis=0, ignore_index=True)
     return None
 
-def update_df(index, login, df, password):
+def update_df(df:pd.DataFrame, index:int, login:str, password:str):
     """
     Inserts a row in a DataFrame or updates an existing row \n
     - index: \n
@@ -66,5 +79,8 @@ def update_df(index, login, df, password):
     if check_for_duplicates(login,df):
         print('duplicate login found. Dataframe not updated')
         return None
-    df.to_csv(path_or_buf = 'vault.csv', index = False, sep = " ")
+    override_file(df)
     return None
+
+if __name__ == "__main__":
+    pass

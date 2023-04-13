@@ -1,7 +1,7 @@
-from plugins.pandas_functions import search_login, read_file, check_for_duplicates, update_df, search_index
+from plugins.pandas_functions import search_login, read_file, check_for_duplicates, update_df, search_index, override_file, create_file
 import pyperclip
 from plugins.pw_generator import random_sequence
-from plugins.encryption import string_decrypt, string_encrypt, columns_decrypt, columns_encrypt
+from plugins.encryption import string_decrypt, string_encrypt, df_dec, df_enc
 from inputs import input_pw, input_login, input_service
 
 def getpw():
@@ -15,7 +15,7 @@ def getpw():
     df = read_file()
 
     #decrypting columns
-    df = columns_decrypt(df,master_pw)
+    df = df_dec(df,master_pw)
 
     # searching for correspondent password in the "password " column
     filter = df['login'] == login
@@ -57,63 +57,102 @@ def addpw():
     - Encrypts both and stores them in the vault \n
     - Sends generated password to clipboard
     """
+    # retrieving dataframe from vault.csv
+    df = read_file()
+
+    # Receiving master password input
+    master_pw = input_pw(timid=False)
+
+    # Decrypting DataFrame
+    df, wrong_master_pw = df_dec(df,master_pw)
+
+    # Aborts operation if master password is wrong
+    if wrong_master_pw: return None
 
     # asking for login and generating password
     master_pw = input_pw()
     login = input_login()
     password = random_sequence()
 
+    #encrypting DataFrame
+    df = df_enc(df)
+
+    # updating the vault.csv file with an appended login and password
+    update_df(df,
+              len(df),
+              login,
+              password
+)
+    # sending password to clipboard
     pyperclip.copy(password)
-
-    # encrypting login and password:
-    enc_login = string_encrypt(login,master_pw)
-    enc_password = string_encrypt(password,master_pw)
-
-    # defining arguments for update_df function
-    df = read_file()
-    index = len(df)
-
-    update_df(index, enc_login, df, enc_password)
 
     return None
 
-def lock_vault():
-    """Encrypts all strings in the vault"""
+def lockvault():
+    """Encrypts all data in the vault.csv file"""
 
-    # turning vault.csv into a dataframe
+    # read file
     df = read_file()
 
-    # applying encryption in all elements
-    df = df.apply(string_encrypt)
+    # get credentials
+    master_pw = input_pw(timid=True)
 
-def unlock_vault():
-    """Unencrypts all passwords and logins in the vault"""
-    pass
+    # encrypt all data
+    df = df_enc(df,master_pw)
 
-def operation_manager(cmd = 'getpw'):
+    # update vault.csv
+    override_file(df)
 
-    if cmd=='encrypt': timid=True
-    else: timid = False
-    key = get_key(timid)
+    return None
 
-    if cmd == 'encrypt':
-        encrypt_csv(key)
-        return None
-    if cmd == 'decrypt':
-        decrypt_csv(key)
-        return None
+def unlockvault():
+    """Decrypts all data in the vault.csv file"""
 
-    login = get_login()
+    # read file
+    df = read_file()
 
-    decrypt_csv(key)
-    try:
-        cmd += f'(\'{login}\')'
-        eval(cmd)
-    except:
-        encrypt_csv(key)
-    encrypt_csv(key)
+    # get credentials
+    master_pw = input_pw(timid=False)
 
-    pass
+    # decrypt all data
+    df = df_dec(df,master_pw)
+
+    # update vault.csv
+    override_file(df)
+
+    return None
+
+def set_vault():
+    """Sets up the vault.csv file that will be used to store the passwords. If it already exists, asks user for extra confirmation"""
+
+    # checking of vault.csv already exists
+    file_exists = True
+    try: read_file()
+    except: file_exists = False
+
+    # if the file exists, ask for confirmation
+    if file_exists:
+        answer = input('Vault already exists and you are about to reset it, erasing all of the stored data and passwords in the process. Proceed anyways? [y/n] ')
+        if answer != 'y':
+            print("Vault was not reset")
+            return None
+        else:
+            print('Proceeding with Vault reset')
+
+    #create file
+    df = create_file()
+
+    # setting master password
+    master_pw = input_pw(timid=True)
+
+    #encrypt file
+    df = df_enc(df,master_pw)
+
+    #create file from df
+    override_file(df)
+
+    return None
+
 
 if __name__ == "__main__":
-    addpw()
+    set_vault()
