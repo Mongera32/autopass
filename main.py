@@ -18,6 +18,7 @@ def main():
     4 - Show all saved services and respective logins (without passwords).
     5 - Delete a service credential from the vault.
     6 - Print a password in the screen.
+    7 - Change master key
     """)
 
     cmd = int(input("Imput desired command number: "))
@@ -50,6 +51,11 @@ def main():
     if cmd == 6:
         guard = VaultGuard()
         guard.show_password()
+        return
+
+    if cmd == 7:
+        guard = VaultGuard()
+        guard.change_master()
         return
 
     print("Command not recognized. Exiting program.")

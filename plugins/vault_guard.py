@@ -55,24 +55,34 @@ class VaultGuard():
 
         return True
 
-    def _input_master_key(self, confirm:bool = True):
+    def _input_master_key(self, confirm:bool = True, override = False):
 
-        if hasattr(self,"key"):
+        if hasattr(self,"key") and not override:
             logger.debug("key has already been defined")
             return
 
-        if confirm:
+        if confirm and not override:
 
-            key1 = getpass.getpass(prompt='\nPlease imput master key:', stream=None)
+            key1 = getpass.getpass(prompt='\nPlease input master key:', stream=None)
             key2 = getpass.getpass(prompt='\nPlease confirm master key: \n', stream=None)
 
             if key1 == key2:
                 self.key = key1
             else:
                 raise ValueError("Master key values don't match.")
-            return
 
-        self.key = getpass.getpass(prompt='\nPlease imput master key:', stream=None)
+        elif confirm and override:
+
+            key1 = getpass.getpass(prompt='\nPlease input new master key:', stream=None)
+            key2 = getpass.getpass(prompt='\nPlease confirm new master key: \n', stream=None)
+
+            if key1 == key2:
+                self.key = key1
+            else:
+                raise ValueError("Master key values don't match.")
+
+        else:
+            self.key = getpass.getpass(prompt='\nPlease input master key:', stream=None)
 
     def _vault_builder(self):
         """Builds and encrypts Vault"""
@@ -267,12 +277,32 @@ class VaultGuard():
             print("\nProceeding.\n")
 
         try:
-            print(f"Login id : {Fore.BLUE + self.vault[service]['password'] + Fore.RESET}")
-            pw = self.vault[service]["password"]
+            print(f"login\t{Fore.BLUE + self.vault[service]['login'] + Fore.RESET}\npassword\t{Fore.BLUE + self.vault[service]['password'] + Fore.RESET}")
         except KeyError:
             self._encrypt_vault()
             print(f"Login for '{service}' not found in vault. Please check login list.")
             return
+
+    def change_master(self):
+
+        confirmation = input(f"{Fore.RED}WARNING:{Fore.RESET} you are about to change the master key. Proceed? [y/n]")
+
+        if confirmation == "n":
+            raise UserWarning("\nAborting\n")
+        elif confirmation != 'y':
+            raise UserWarning("\nCommand not recognized. Aborting.\n")
+        elif confirmation == 'y':
+            print("\nProceeding.\n")
+
+        self._decrypt_vault()
+
+        try:
+            self._input_master_key(confirm = True, override = True)
+        except ValueError:
+            self._encrypt_vault()
+            return
+
+        self._encrypt_vault()
 
 if __name__ == "__main__":
     pass
