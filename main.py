@@ -1,42 +1,47 @@
-from plugins.data_manager import operation_manager, get_key, get_login, getpw, add_pw
-from plugins.shell_interface import encrypt_csv, decrypt_csv
+from plugins.vault_guard import VaultGuard
+import logging
 
-def main(cmd = 'getpw'):
+severity_level = logging.INFO
+logger = logging.getLogger(__name__)
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(format=FORMAT)
+logger.setLevel(severity_level)
 
-    cmd = input("""
-    Imput desired operation number:
+def main():
 
-    1 - get login
-    2 - get password
-    3 - insert login/password
-    4 - encrypt
-    5 - decrypt
-          """)
+    print("""
+    Select one of the following commands:
+
+    1 - Getting the password for a specific login
+    2 - Adding a new login and password pair
+    3 - Changing the password for a specific login
+    4 - Showing all saved logins (without passwords)
+
+    """)
+
+    cmd = int(input("Imput desired command number: "))
 
     if cmd == 1:
-        get_login()
+        guard = VaultGuard()
+        guard.get()
         return
 
     if cmd == 2:
-        getpw()
+        guard = VaultGuard()
+        guard.new()
         return
 
     if cmd == 3:
-        add_pw()
+        guard = VaultGuard()
+        guard.change()
         return
 
+    if cmd == 4:
+        guard = VaultGuard()
+        guard.show()
+        return
 
-
+    print("No command select. Exiting program.")
 
 if __name__ == "__main__":
-    print("hello world!")
-
-    # Check vault file
-
-    # build vault if needed
-
-    # ask for command
-
-
-#    cmd = input('input command: ')
-#    main(cmd)
+    main()

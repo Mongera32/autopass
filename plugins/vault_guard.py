@@ -1,5 +1,6 @@
 
-import os, subprocess, getpass, randomizer, pyperclip, pickle
+import os, subprocess, getpass, pyperclip, pickle
+from . import randomizer
 import logging
 from colorama import Fore
 
@@ -25,14 +26,16 @@ class VaultGuard():
         if self._vault_check():
             self._vault_builder()
 
-        self._input_master_key()
+        self._input_master_key(confirm = False)
 
         self._access_vault()
 
     def _set_vault_path(self):
         """Sets path of vault.csv file"""
 
-        path = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.dirname(os.path.realpath(__file__))
+        logger.debug(f"path is {path}")
+        #path = os.path.dirname(os.path.abspath(__file__))
 
         path_list = path.split("/")
         path_list.remove("plugins")
@@ -42,6 +45,8 @@ class VaultGuard():
         self.decrypted_path = path
         self.encrypted_path = path + ".cpt"
 
+        logger.debug(f"final path is {path}")
+
     def _vault_check(self) -> bool:
         """Returns True if vault does NOT exist and False otherwise."""
 
@@ -50,19 +55,24 @@ class VaultGuard():
 
         return True
 
-    def _input_master_key(self):
+    def _input_master_key(self, confirm:bool = True):
 
         if hasattr(self,"key"):
             logger.debug("key has already been defined")
             return
 
-        key1 = getpass.getpass(prompt='Please imput master key: \n', stream=None)
-        key2 = getpass.getpass(prompt='Please confirm master key: \n', stream=None)
+        if confirm:
 
-        if key1 == key2:
-            self.key = key1
-        else:
-            raise ValueError("Master key values don't match.")
+            key1 = getpass.getpass(prompt='\nPlease imput master key:', stream=None)
+            key2 = getpass.getpass(prompt='\nPlease confirm master key: \n', stream=None)
+
+            if key1 == key2:
+                self.key = key1
+            else:
+                raise ValueError("Master key values don't match.")
+            return
+
+        self.key = getpass.getpass(prompt='\nPlease imput master key:', stream=None)
 
     def _vault_builder(self):
         """Builds and encrypts Vault"""
@@ -81,7 +91,7 @@ class VaultGuard():
         elif confirmation == 'y':
             print("\nProceeding.\n")
 
-        self._input_master_key()
+        self._input_master_key(confirm = True)
 
         try:
             logger.debug("Building vault.")
@@ -136,7 +146,7 @@ class VaultGuard():
         self._decrypt_vault()
 
         try:
-            with open("vault","rb") as f:
+            with open(self.decrypted_path,"rb") as f:
                 vault = pickle.load(f)
                 self.vault = vault
         except EOFError:
@@ -168,7 +178,7 @@ class VaultGuard():
         self._insert_to_vault()
 
         pyperclip.copy(pw)
-        print("Changed password copied to clipboard!")
+        print("\nChanged password copied to clipboard!")
 
         self._encrypt_vault()
 
@@ -193,7 +203,7 @@ class VaultGuard():
         self._insert_to_vault()
 
         pyperclip.copy(pw)
-        print("New password copied to clipboard!")
+        print("\nNew password copied to clipboard!")
 
         self._encrypt_vault()
 
@@ -212,7 +222,7 @@ class VaultGuard():
             return
 
         pyperclip.copy(pw)
-        print("Password copied to clipboard!")
+        print("\nPassword copied to clipboard!")
 
         self._encrypt_vault()
 
@@ -229,5 +239,4 @@ class VaultGuard():
         self._encrypt_vault()
 
 if __name__ == "__main__":
-    guard = VaultGuard()
-    guard.show()
+    pass
