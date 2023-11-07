@@ -1,5 +1,3 @@
-
-
 # autopass
 
 local password vault cryptographed with the Advanced Encryption Standard (AES).
