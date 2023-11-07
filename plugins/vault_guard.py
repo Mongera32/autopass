@@ -164,8 +164,6 @@ class VaultGuard():
 
         login = input("Input login credential for the password you want to get: ")
 
-        self._decrypt_vault()
-
         pw = randomizer.random_sequence()
 
         try:
@@ -175,19 +173,17 @@ class VaultGuard():
             print(f"Login '{login}' does not exist in the vault!")
             return
 
+        self._decrypt_vault()
         self._insert_to_vault()
+        self._encrypt_vault()
 
         pyperclip.copy(pw)
         print("\nChanged password copied to clipboard!")
-
-        self._encrypt_vault()
 
     def new(self):
         """Updates `self.vault` dict and persists it into vault file."""
 
         login = input("Input login credential you want to add: ")
-
-        self._decrypt_vault()
 
         try:
             if login in self.vault: raise KeyError
@@ -200,19 +196,17 @@ class VaultGuard():
         pw = randomizer.random_sequence()
         self.vault[login] = pw
 
+        self._decrypt_vault()
         self._insert_to_vault()
+        self._encrypt_vault()
 
         pyperclip.copy(pw)
         print("\nNew password copied to clipboard!")
-
-        self._encrypt_vault()
 
     def get(self):
         """Looks up password corresponding to given login and copies it to clipboard."""
 
         login = input("Input login credential for the password you want: ")
-
-        self._decrypt_vault()
 
         try:
             pw = self.vault[login]
@@ -224,11 +218,7 @@ class VaultGuard():
         pyperclip.copy(pw)
         print("\nPassword copied to clipboard!")
 
-        self._encrypt_vault()
-
     def show(self):
-
-        self._decrypt_vault()
 
         login_list = self.vault.keys()
 
@@ -236,7 +226,26 @@ class VaultGuard():
         for login in login_list:
             print(login)
 
+    def delete(self):
+
+        login1 = input("Input login credential for the password you want to delete: ")
+        login2 = input(f"{Fore.RED}WARNING:{Fore.RESET} This cannot be undone. Input login again to confirm: ")
+
+        if login1 == login2:
+            login = login1
+        else:
+            raise ValueError("\nLogin values don't match. Aborting.")
+
+        try:
+            self.vault.pop(login)
+        except KeyError:
+            print(f"Login '{login}' does not exist in the vault. Aborting")
+
+        self._decrypt_vault()
+        self._insert_to_vault()
         self._encrypt_vault()
+
+        print(f"\nLogin {login} deleted!")
 
 if __name__ == "__main__":
     pass

@@ -12,11 +12,11 @@ def main():
     print("""
     Select one of the following commands:
 
-    1 - Getting the password for a specific login
-    2 - Adding a new login and password pair
-    3 - Changing the password for a specific login
-    4 - Showing all saved logins (without passwords)
-
+    1 - Get the password for a specific login.
+    2 - Add a new login and password pair.
+    3 - Change the password for a specific login.
+    4 - Show all saved logins (without passwords).
+    5 - Delete a login from the vault.
     """)
 
     cmd = int(input("Imput desired command number: "))
@@ -39,6 +39,11 @@ def main():
     if cmd == 4:
         guard = VaultGuard()
         guard.show()
+        return
+
+    if cmd == 5:
+        guard = VaultGuard()
+        guard.delete()
         return
 
     print("No command select. Exiting program.")
