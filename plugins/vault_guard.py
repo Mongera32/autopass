@@ -1,10 +1,9 @@
 
-import os, subprocess, getpass, randomizer, pyperclip
-import pandas as pd
+import os, subprocess, getpass, randomizer, pyperclip, pickle
 import logging
+from colorama import Fore
 
-
-severity_level = logging.DEBUG
+severity_level = logging.INFO
 logger = logging.getLogger(__name__)
 FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 logging.basicConfig(format=FORMAT)
@@ -12,20 +11,23 @@ logger.setLevel(severity_level)
 
 class VaultGuard():
 
-    def __init__(self, key) -> None:
+    # TODO implement test features
+    def __init__(self) -> None:
+        f"""
+        Creates VaultGuard instance.
 
-        self.key = key
+        `key` argument is the vault master key. Memorize this key and {Fore.RED}DO NOT FORGET IT{Fore.RESET},
+        otherwise you will {Fore.RED}LOSE ACCESS TO YOUR VAULT{Fore.RESET}.
+        """
+
         self._set_vault_path()
 
-        self._decrypt_csv()
-
-        try:
-            self._access_vault()
-        except FileNotFoundError:
+        if self._vault_check():
             self._vault_builder()
-            self._access_vault()
 
-        self._encrypt_csv()
+        self._input_master_key()
+
+        self._access_vault()
 
     def _set_vault_path(self):
         """Sets path of vault.csv file"""
@@ -34,135 +36,198 @@ class VaultGuard():
 
         path_list = path.split("/")
         path_list.remove("plugins")
-        path_list.append("vault.csv")
+        path_list.append("vault")
         path = "/".join(path_list)
 
         self.decrypted_path = path
         self.encrypted_path = path + ".cpt"
 
     def _vault_check(self) -> bool:
-        """Returns True e vault exists and False if not."""
+        """Returns True if vault does NOT exist and False otherwise."""
 
         if os.path.exists(self.encrypted_path) or os.path.exists(self.decrypted_path):
-            return True
+            return False
 
-        return False
+        return True
 
-    def _vault_builder(self):
-        """Checks if vault exists and builds it if not."""
+    def _input_master_key(self):
 
-        if self._vault_check():
+        if hasattr(self,"key"):
+            logger.debug("key has already been defined")
             return
 
+        key1 = getpass.getpass(prompt='Please imput master key: \n', stream=None)
+        key2 = getpass.getpass(prompt='Please confirm master key: \n', stream=None)
+
+        if key1 == key2:
+            self.key = key1
+        else:
+            raise ValueError("Master key values don't match.")
+
+    def _vault_builder(self):
+        """Builds and encrypts Vault"""
+
+        confirmation = input(f"""
+    {Fore.RED}WARNING{Fore.RESET}
+
+    Vault will be built now and requires a user input master key to proceed.
+    This key is needed to open your vault, and you will {Fore.RED}lose access{Fore.RESET} to all stored data in
+    your vault if you forget the master key. proceed? [y/n]\n
+""")
+        if confirmation == "n":
+            raise UserWarning("\nAborting\n")
+        elif confirmation != 'y':
+            raise UserWarning("\nCommand not recognized. Aborting.\n")
+        elif confirmation == 'y':
+            print("\nProceeding.\n")
+
+        self._input_master_key()
+
         try:
-            f = open(self.decrypted_path, "x")
-            f.write("login password")
-            f.close()
+            logger.debug("Building vault.")
+
+            self.vault = {}
+
+            with open(self.decrypted_path, "xb") as f:
+                pickle.dump(self.vault, f)
+
+            logger.debug("Vault building finished.")
+
         except FileExistsError:
-            f = open(self.decrypted_path, "w")
-            f.truncate()
-            f.write("login password")
-            f.close()
+            logger.debug(f"Vault already exists. Exiting vault builder.")
 
-    def _decrypt_csv(self):
+        self._encrypt_vault()
 
-        if not os.path.exists(self.encrypted_path) and os.path.exists(self.decrypted_path):
-            print("Vault already decrypted")
+    def _decrypt_vault(self):
 
+        if not self._check_encryption():
+            logger.debug("Vault already decrypted")
+            return
+
+        logger.debug("Applying decryption")
         subprocess.run(f'ccdecrypt --key {self.key} {self.encrypted_path}', shell=True)
+        logger.debug(f"Vault is now {Fore.RED}DECRYPTED{Fore.RESET}")
 
-    def _encrypt_csv(self):
+    def _encrypt_vault(self):
 
-        if os.path.exists(self.encrypted_path) and not os.path.exists(self.decrypted_path):
-            print("Vault already encrypted")
+        if self._check_encryption():
+            logger.debug("Vault already encrypted")
+            return
 
+        logger.debug("Applying encryption")
         subprocess.run(f'ccencrypt --key {self.key} {self.decrypted_path}', shell=True)
+        logger.debug(f"Vault is now {Fore.GREEN}ENCRYPTED{Fore.RESET}")
+
+    def _check_encryption(self) -> bool:
+        """Returns True if encrypted and False if decrypted. Builds Vault and encrypts if it doesn't exist."""
+
+        if os.path.exists(self.encrypted_path):
+            return True
+
+        if os.path.exists(self.decrypted_path):
+            return False
+
+        self._vault_builder()
+        return True
 
     def _access_vault(self):
-        """reads the csv file and creates a DataFrame"""
+        """reads the vault file and unserializes the dict."""
+
+        self._decrypt_vault()
+
         try:
-            df = pd.read_csv(self.decrypted_path, sep = " ")
-            if list(df.columns) != ["login","password"]:
-                raise FileNotFoundError
-        except (FileNotFoundError, pd.errors.EmptyDataError) as e:
-            self._vault_builder()
-            df = pd.read_csv(self.decrypted_path, sep = " ")
+            with open("vault","rb") as f:
+                vault = pickle.load(f)
+                self.vault = vault
+        except EOFError:
+            self.vault = {}
 
-        self.df = df
+        self._encrypt_vault()
 
-    def get_login(self, login):
+    def _insert_to_vault(self):
+        """Serializes ``self.vault`` dict into vault file."""
+
+        with open(self.decrypted_path,"wb") as f:
+            pickle.dump(self.vault,f)
+
+    def change(self):
+
+        login = input("Input login credential for the password you want to get: ")
+
+        self._decrypt_vault()
+
+        pw = randomizer.random_sequence()
+
+        try:
+            self.vault[login] = pw
+        except KeyError:
+            self._encrypt_vault()
+            print(f"Login '{login}' does not exist in the vault!")
+            return
+
+        self._insert_to_vault()
+
+        pyperclip.copy(pw)
+        print("Changed password copied to clipboard!")
+
+        self._encrypt_vault()
+
+    def new(self):
+        """Updates `self.vault` dict and persists it into vault file."""
+
+        login = input("Input login credential you want to add: ")
+
+        self._decrypt_vault()
+
+        try:
+            if login in self.vault: raise KeyError
+        except KeyError:
+            self._encrypt_vault()
+            print(f"Login '{login}' already exists in the vault.")
+            return
+
+        # Creating new password
+        pw = randomizer.random_sequence()
+        self.vault[login] = pw
+
+        self._insert_to_vault()
+
+        pyperclip.copy(pw)
+        print("New password copied to clipboard!")
+
+        self._encrypt_vault()
+
+    def get(self):
         """Looks up password corresponding to given login and copies it to clipboard."""
 
-        filter = self.df['login'] == login
-        row = self.df[filter]
-        pw = row["password"][2]
+        login = input("Input login credential for the password you want: ")
+
+        self._decrypt_vault()
+
+        try:
+            pw = self.vault[login]
+        except KeyError:
+            self._encrypt_vault()
+            print(f"Login '{login}' not found in vault. Please check login list.")
+            return
+
         pyperclip.copy(pw)
         print("Password copied to clipboard!")
 
-    def _check_for_duplicates(self, login) -> bool:
-        """check if login appears on new dataframe more than once. Returns True if so."""
+        self._encrypt_vault()
 
-        filter = self.df['login'] == login
-        if len(self.df[filter]) >= 1:
-            return True
-        return False
+    def show(self):
 
-    def new_login(self, login):
-        """Creates new dataframe row with the passed login and a random password"""
+        self._decrypt_vault()
 
-        self._decrypt_csv()
+        login_list = self.vault.keys()
 
-        if self._check_for_duplicates(login):
-            raise KeyError("login already exists in vault")
+        print("Printing list of saved login credentials:\n")
+        for login in login_list:
+            print(login)
 
-        password = randomizer.random_sequence()
-
-        new_row = pd.DataFrame({"login":[login],
-                                "password":[password]
-})
-
-        df = pd.concat( [new_row, self.df],
-                        axis = 0,
-                        ignore_index = True)
-
-        df.to_csv(  self.decrypted_path,
-                    index = False,
-                    sep = " ")
-
-        pyperclip.copy(password)
-        print("New password copied to clipboard!")
-
-        self.df = df
-
-        self._encrypt_csv()
-
-    def change_login(self, login:str):
-
-        self._decrypt_csv()
-
-        password = randomizer.random_sequence()
-
-        self.df.set_index("login")
-
-        df = self.df
-
-        df.loc[login,'password'] = password
-        logger.debug(f"passwrod now: {password}")
-        logger.debug(f"DataFrame now: {df}")
-
-        df.reset_index()
-
-        df.to_csv(  self.decrypted_path,
-                    index = False,
-                    sep = " ",)
-
-        pyperclip.copy(password)
-        print("Changed password copied to clipboard!")
-
-        self._encrypt_csv()
+        self._encrypt_vault()
 
 if __name__ == "__main__":
-    guard = VaultGuard("teste")
-    guard.change_login("macaco2")
-
-    guard._decrypt_csv()
+    guard = VaultGuard()
+    guard.show()
