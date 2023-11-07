@@ -17,6 +17,7 @@ def main():
     3 - Change the password for a specific login.
     4 - Show all saved logins (without passwords).
     5 - Delete a login from the vault.
+    6 - Print password in the screen.
     """)
 
     cmd = int(input("Imput desired command number: "))
@@ -44,6 +45,11 @@ def main():
     if cmd == 5:
         guard = VaultGuard()
         guard.delete()
+        return
+
+    if cmd == 6:
+        guard = VaultGuard()
+        guard.show_password()
         return
 
     print("No command select. Exiting program.")

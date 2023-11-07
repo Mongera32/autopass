@@ -162,15 +162,15 @@ class VaultGuard():
 
     def change(self):
 
-        login = input("Input login credential for the password you want to get: ")
+        service = input("Input login credential for the password you want to get: ")
 
         pw = randomizer.random_sequence()
 
         try:
-            self.vault[login] = pw
+            self.vault[service]["password"] = pw
         except KeyError:
             self._encrypt_vault()
-            print(f"Login '{login}' does not exist in the vault!")
+            print(f"Service '{service}' does not exist in the vault!")
             return
 
         self._decrypt_vault()
@@ -183,18 +183,25 @@ class VaultGuard():
     def new(self):
         """Updates `self.vault` dict and persists it into vault file."""
 
+        service = input("Input the name of the service you want to add: ")
+
         login = input("Input login credential you want to add: ")
 
+        if login == "":
+            login = service
+
         try:
-            if login in self.vault: raise KeyError
+            if service in self.vault: raise KeyError
         except KeyError:
             self._encrypt_vault()
-            print(f"Login '{login}' already exists in the vault.")
+            print(f"Data for '{service}' already exists in the vault.")
             return
 
         # Creating new password
         pw = randomizer.random_sequence()
-        self.vault[login] = pw
+        self.vault[service] = {"login":login,
+                               "password":pw
+        }
 
         self._decrypt_vault()
         self._insert_to_vault()
@@ -206,13 +213,14 @@ class VaultGuard():
     def get(self):
         """Looks up password corresponding to given login and copies it to clipboard."""
 
-        login = input("Input login credential for the password you want: ")
+        service = input("Input service name for the password you want: ")
 
         try:
-            pw = self.vault[login]
+            print(f"Login id : {Fore.BLUE + self.vault[service]['login'] + Fore.RESET}")
+            pw = self.vault[service]["password"]
         except KeyError:
             self._encrypt_vault()
-            print(f"Login '{login}' not found in vault. Please check login list.")
+            print(f"Login for '{service}' not found in vault. Please check login list.")
             return
 
         pyperclip.copy(pw)
@@ -220,32 +228,51 @@ class VaultGuard():
 
     def show(self):
 
-        login_list = self.vault.keys()
-
         print("Printing list of saved login credentials:\n")
-        for login in login_list:
-            print(login)
+        for service in self.vault.keys():
+            print(service + " -> " + self.vault[service]["login"])
 
     def delete(self):
 
-        login1 = input("Input login credential for the password you want to delete: ")
-        login2 = input(f"{Fore.RED}WARNING:{Fore.RESET} This cannot be undone. Input login again to confirm: ")
+        service1 = input("Input service credential for the password you want to delete: ")
+        service2 = input(f"{Fore.RED}WARNING:{Fore.RESET} This cannot be undone. Input service again to confirm: ")
 
-        if login1 == login2:
-            login = login1
+        if service1 == service2:
+            service = service1
         else:
-            raise ValueError("\nLogin values don't match. Aborting.")
+            raise ValueError("\nservice values don't match. Aborting.")
 
         try:
-            self.vault.pop(login)
+            self.vault.pop(service)
         except KeyError:
-            print(f"Login '{login}' does not exist in the vault. Aborting")
+            print(f"service '{service}' does not exist in the vault. Aborting")
 
         self._decrypt_vault()
         self._insert_to_vault()
         self._encrypt_vault()
 
-        print(f"\nLogin {login} deleted!")
+        print(f"\nservice {service} deleted!")
+
+    def show_password(self):
+
+        service = input("Input service name for the password you want: ")
+
+        confirmation = input(f"{Fore.RED}WARNING:{Fore.RESET} you are about to show the password in your screen! proceed? [y/n]")
+
+        if confirmation == "n":
+            raise UserWarning("\nAborting\n")
+        elif confirmation != 'y':
+            raise UserWarning("\nCommand not recognized. Aborting.\n")
+        elif confirmation == 'y':
+            print("\nProceeding.\n")
+
+        try:
+            print(f"Login id : {Fore.BLUE + self.vault[service]['password'] + Fore.RESET}")
+            pw = self.vault[service]["password"]
+        except KeyError:
+            self._encrypt_vault()
+            print(f"Login for '{service}' not found in vault. Please check login list.")
+            return
 
 if __name__ == "__main__":
     pass
