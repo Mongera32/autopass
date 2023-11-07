@@ -44,7 +44,9 @@ def updatepw(login):
 
     return None
 
-def addpw(login):
+
+
+def add_pw(login):
     """stores a password in the vault"""
 
     password = random_sequence()
@@ -61,13 +63,26 @@ def addpw(login):
 
 def operation_manager(cmd = 'getpw'):
 
-    if cmd='encrypt': timid=True
-    else: timid = False
+    print("""
+    Imput desired operation:
+
+    1 - get key
+    2 - get password
+    3 - insert key/password
+    4 - encrypt
+    5 - decrypt
+          """)
+
+    timid = False
+    if cmd == 'encrypt':
+        timid = True
+
     key = get_key(timid)
 
     if cmd == 'encrypt':
         encrypt_csv(key)
         return None
+
     if cmd == 'decrypt':
         decrypt_csv(key)
         return None
