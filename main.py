@@ -12,12 +12,12 @@ def main():
     print("""
     Select one of the following commands:
 
-    1 - Get the password for a specific login.
-    2 - Add a new login and password pair.
-    3 - Change the password for a specific login.
-    4 - Show all saved logins (without passwords).
-    5 - Delete a login from the vault.
-    6 - Print password in the screen.
+    1 - Get the password for a specific service.
+    2 - Add credential to the vault.
+    3 - Change the password for a specific service.
+    4 - Show all saved services and respective logins (without passwords).
+    5 - Delete a service credential from the vault.
+    6 - Print a password in the screen.
     """)
 
     cmd = int(input("Imput desired command number: "))
@@ -52,7 +52,7 @@ def main():
         guard.show_password()
         return
 
-    print("No command select. Exiting program.")
+    print("Command not recognized. Exiting program.")
 
 if __name__ == "__main__":
     main()
