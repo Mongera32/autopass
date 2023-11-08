@@ -3,6 +3,7 @@ import os, subprocess, getpass, pyperclip, pickle
 from . import randomizer
 import logging
 from colorama import Fore
+from prettytable import PrettyTable
 
 severity_level = logging.INFO
 logger = logging.getLogger(__name__)
@@ -170,11 +171,12 @@ class VaultGuard():
         with open(self.decrypted_path,"wb") as f:
             pickle.dump(self.vault,f)
 
-    def change(self):
+    def change(self, service:str, choose_password:bool = False):
 
-        service = input("Input login credential for the password you want to get: ")
-
-        pw = randomizer.random_sequence()
+        if choose_password:
+            pw = getpass.getpass(prompt='\nPlease input desired password: ', stream=None)
+        else:
+            pw = randomizer.random_sequence()
 
         try:
             self.vault[service]["password"] = pw
@@ -190,14 +192,12 @@ class VaultGuard():
         pyperclip.copy(pw)
         print("\nChanged password copied to clipboard!")
 
-    def new(self):
+    def new(self, service:str, choose_login:bool = False, choose_password:bool = False):
         """Updates `self.vault` dict and persists it into vault file."""
 
-        service = input("Input the name of the service you want to add: ")
-
-        login = input("Input login credential you want to add: ")
-
-        if login == "":
+        if choose_login:
+            login = input("Input login for the credential you want to add: ")
+        else:
             login = service
 
         try:
@@ -207,8 +207,11 @@ class VaultGuard():
             print(f"Data for '{service}' already exists in the vault.")
             return
 
-        # Creating new password
-        pw = randomizer.random_sequence()
+        if choose_password:
+            pw = getpass.getpass(prompt='\nPlease input desired password: ', stream=None)
+        else:
+            pw = randomizer.random_sequence()
+
         self.vault[service] = {"login":login,
                                "password":pw
         }
@@ -220,10 +223,8 @@ class VaultGuard():
         pyperclip.copy(pw)
         print("\nNew password copied to clipboard!")
 
-    def get(self):
+    def get(self, service:str):
         """Looks up password corresponding to given login and copies it to clipboard."""
-
-        service = input("Input service name for the password you want: ")
 
         try:
             print(f"Login id : {Fore.BLUE + self.vault[service]['login'] + Fore.RESET}")
@@ -236,26 +237,40 @@ class VaultGuard():
         pyperclip.copy(pw)
         print("\nPassword copied to clipboard!")
 
-    def show(self):
+    def show(self, service, show_all = False):
 
-        print("Printing list of saved login credentials:\n")
-        for service in self.vault.keys():
-            print(service + " -> " + self.vault[service]["login"])
+        table = PrettyTable(["service","login"])
 
-    def delete(self):
-
-        service1 = input("Input service credential for the password you want to delete: ")
-        service2 = input(f"{Fore.RED}WARNING:{Fore.RESET} This cannot be undone. Input service again to confirm: ")
-
-        if service1 == service2:
-            service = service1
+        if show_all:
+            print("Printing credentials stored in the vault:\n")
+            for key in self.vault.keys():
+                table.add_row([key, self.vault[key]["login"]])
         else:
-            raise ValueError("\nservice values don't match. Aborting.")
+            print("Printing service and login:\n")
+            table.add_row([service, self.vault[service]["login"]])
 
-        try:
-            self.vault.pop(service)
-        except KeyError:
-            print(f"service '{service}' does not exist in the vault. Aborting")
+        print(table)
+
+    def delete(self, service:str):
+
+        if service not in self.vault:
+            raise KeyError(f"service '{service}' does not exist in the vault. Aborting")
+
+        print(f"""
+
+        {Fore.RED}WARNING{Fore.RESET}
+
+        You are about to delete your login and password for {Fore.BLUE + service + Fore.RESET}.
+
+              """)
+
+        confirmation = input("\nAre you absolutely sure you want to delete those credentials? [input service name in blue to continue]: ")
+
+        if confirmation != service:
+            print("\nInput does not match service name and confirmation failed. Aborting")
+            return
+
+        self.vault.pop(service)
 
         self._decrypt_vault()
         self._insert_to_vault()
@@ -263,21 +278,20 @@ class VaultGuard():
 
         print(f"\nservice {service} deleted!")
 
-    def show_password(self):
+    def expose(self, service:str):
 
-        service = input("Input service name for the password you want: ")
+        confirmation = input(f"{Fore.RED}WARNING:{Fore.RESET} you are about to show the login and password for {Fore.BLUE + service + Fore.RESET} in your screen! type {Fore.BLUE}y{Fore.RESET} to proceed: ")
 
-        confirmation = input(f"{Fore.RED}WARNING:{Fore.RESET} you are about to show the password in your screen! proceed? [y/n]")
+        table = PrettyTable(["login","password"])
 
-        if confirmation == "n":
-            raise UserWarning("\nAborting\n")
-        elif confirmation != 'y':
-            raise UserWarning("\nCommand not recognized. Aborting.\n")
-        elif confirmation == 'y':
-            print("\nProceeding.\n")
+        if confirmation != "y":
+            raise UserWarning("\nConfirmation failed. Aborting\n")
 
         try:
-            print(f"login\t{Fore.BLUE + self.vault[service]['login'] + Fore.RESET}\npassword\t{Fore.BLUE + self.vault[service]['password'] + Fore.RESET}")
+            table.add_row([self.vault[service]['login'],
+                           self.vault[service]['password']])
+            print(table)
+
         except KeyError:
             self._encrypt_vault()
             print(f"Login for '{service}' not found in vault. Please check login list.")

@@ -45,7 +45,6 @@ def updatepw(login):
     return None
 
 
-
 def add_pw(login):
     """stores a password in the vault"""
 
