@@ -64,7 +64,7 @@ class VaultGuard():
 
         if confirm:
 
-            key1 = getpass.getpass(prompt='\nPlease imput master key:', stream=None)
+            key1 = getpass.getpass(prompt='\nPlease input master key:', stream=None)
             key2 = getpass.getpass(prompt='\nPlease confirm master key: \n', stream=None)
 
             if key1 == key2:
@@ -73,7 +73,7 @@ class VaultGuard():
                 raise ValueError("Master key values don't match.")
             return
 
-        self.key = getpass.getpass(prompt='\nPlease imput master key:', stream=None)
+        self.key = getpass.getpass(prompt='\nPlease input master key:', stream=None)
 
     def _vault_builder(self):
         """Builds and encrypts Vault"""
@@ -286,6 +286,28 @@ class VaultGuard():
             self._encrypt_vault()
             print(f"Login for '{service}' not found in vault. Please check login list.")
             return
+
+    def change_master(self):
+
+        confirmation = input(f"{Fore.RED}WARNING:{Fore.RESET} you are about to change your vault master key! type {Fore.BLUE}y{Fore.RESET} to proceed: ")
+
+        if confirmation == "y":
+
+            key1 = getpass.getpass(prompt='\nPlease input new master key:', stream=None)
+            key2 = getpass.getpass(prompt='\nPlease confirm new master key: \n', stream=None)
+
+            if key1 == key2:
+                new_key = key1
+            else:
+                raise ValueError("Master key values don't match.")
+            return
+
+        self._decrypt_vault()
+
+        self.key = new_key
+
+        self._encrypt_vault()
+
 
 if __name__ == "__main__":
     pass
