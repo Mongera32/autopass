@@ -13,7 +13,7 @@ sudo apt-get install ccrypt
 
 pip install -r requirements.txt
 
-echo "python3 `echo $PWD`/main.py \$1 \$2 \$3 \$4 \$5" > vault
+echo "python3 \`echo $PWD\`/main.py \\$1 \\$2 \\$3 \\$4 \\$5" > vault
 
 chmod u+x vault
 
