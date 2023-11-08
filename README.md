@@ -7,6 +7,8 @@ The author of this project makes no guarantees whatsoever about this package and
 
 sudo apt-get update
 
+sudo apt install python3-pip
+
 sudo apt-get install ccrypt
 
 pip install -r requirements.txt
