@@ -230,6 +230,8 @@ class VaultGuard():
 
         table = PrettyTable(["service","login"])
 
+        self.vault = dict(sorted(self.vault.items()))
+
         if show_all:
             print("Printing credentials stored in the vault:\n")
             for key in self.vault.keys():
@@ -253,7 +255,7 @@ class VaultGuard():
 
               """)
 
-        confirmation = input("\nAre you absolutely sure you want to delete those credentials? [input service name in blue to continue]: ")
+        confirmation = input("\nAre you absolutely sure you want to delete those credentials? [input name in blue to confirm]: ")
 
         if confirmation != service:
             print("\nInput does not match service name and confirmation failed. Aborting")
@@ -265,7 +267,7 @@ class VaultGuard():
         self._insert_to_vault()
         self._encrypt_vault()
 
-        print(f"\nservice {service} deleted!")
+        print(f"\ncredentials for {service} deleted!")
 
     def expose(self, service:str):
 
