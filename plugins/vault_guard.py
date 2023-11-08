@@ -56,13 +56,13 @@ class VaultGuard():
 
         return True
 
-    def _input_master_key(self, confirm:bool = True):
+    def _input_master_key(self, confirm:bool = True, override = False):
 
-        if hasattr(self,"key"):
+        if hasattr(self,"key") and not override:
             logger.debug("key has already been defined")
             return
 
-        if confirm:
+        if confirm and not override:
 
             key1 = getpass.getpass(prompt='\nPlease input master key:', stream=None)
             key2 = getpass.getpass(prompt='\nPlease confirm master key: \n', stream=None)
@@ -71,7 +71,6 @@ class VaultGuard():
                 self.key = key1
             else:
                 raise ValueError("Master key values don't match.")
-            return
 
         self.key = getpass.getpass(prompt='\nPlease input master key:', stream=None)
 
@@ -307,7 +306,6 @@ class VaultGuard():
         self.key = new_key
 
         self._encrypt_vault()
-
 
 if __name__ == "__main__":
     pass

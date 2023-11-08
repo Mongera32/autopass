@@ -58,6 +58,8 @@ def main():
 
         change_master - Changes your master key
 
+        delete - Delete a credential from the vault.
+
         """)
 
         return
@@ -114,6 +116,7 @@ def main():
         return
 
     print("No command selected. Exiting program.")
+
 
 if __name__ == "__main__":
     main()
