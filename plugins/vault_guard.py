@@ -72,18 +72,7 @@ class VaultGuard():
             else:
                 raise ValueError("Master key values don't match.")
 
-        elif confirm and override:
-
-            key1 = getpass.getpass(prompt='\nPlease input new master key:', stream=None)
-            key2 = getpass.getpass(prompt='\nPlease confirm new master key: \n', stream=None)
-
-            if key1 == key2:
-                self.key = key1
-            else:
-                raise ValueError("Master key values don't match.")
-
-        else:
-            self.key = getpass.getpass(prompt='\nPlease input master key:', stream=None)
+        self.key = getpass.getpass(prompt='\nPlease input master key:', stream=None)
 
     def _vault_builder(self):
         """Builds and encrypts Vault"""
@@ -299,22 +288,22 @@ class VaultGuard():
 
     def change_master(self):
 
-        confirmation = input(f"{Fore.RED}WARNING:{Fore.RESET} you are about to change the master key. Proceed? [y/n]")
+        confirmation = input(f"{Fore.RED}WARNING:{Fore.RESET} you are about to change your vault master key! type {Fore.BLUE}y{Fore.RESET} to proceed: ")
 
-        if confirmation == "n":
-            raise UserWarning("\nAborting\n")
-        elif confirmation != 'y':
-            raise UserWarning("\nCommand not recognized. Aborting.\n")
-        elif confirmation == 'y':
-            print("\nProceeding.\n")
+        if confirmation == "y":
+
+            key1 = getpass.getpass(prompt='\nPlease input new master key:', stream=None)
+            key2 = getpass.getpass(prompt='\nPlease confirm new master key: \n', stream=None)
+
+            if key1 == key2:
+                new_key = key1
+            else:
+                raise ValueError("Master key values don't match.")
+            return
 
         self._decrypt_vault()
 
-        try:
-            self._input_master_key(confirm = True, override = True)
-        except ValueError:
-            self._encrypt_vault()
-            return
+        self.key = new_key
 
         self._encrypt_vault()
 

@@ -1,6 +1,5 @@
 from plugins.vault_guard import VaultGuard
 import logging, sys
-from prettytable import PrettyTable
 
 severity_level = logging.INFO
 logger = logging.getLogger(__name__)
@@ -42,6 +41,7 @@ def main():
     if command == 'help':
 
         print("""
+
         Arguments:
 
         get - Copy the password for a specific login to the clipboard.
@@ -56,9 +56,10 @@ def main():
 
         expose - Show a specific password on the screen.
 
+        change_master - Changes your master key
+
         delete - Delete a credential from the vault.
 
-        expose - Show a specific password on the screen.
         """)
 
         return
@@ -106,6 +107,12 @@ def main():
 
         guard = VaultGuard()
         guard.expose(service)
+        return
+
+    if command == 'change_master':
+
+        guard = VaultGuard()
+        guard.change_master()
         return
 
     print("No command selected. Exiting program.")
