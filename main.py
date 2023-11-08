@@ -64,11 +64,6 @@ def main():
 
         return
 
-    try:
-        check_var(service)
-    except NameError:
-        print("service not defined")
-
     if command == 'get':
 
         guard = VaultGuard()
