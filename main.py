@@ -1,5 +1,6 @@
 from plugins.vault_guard import VaultGuard
-import logging
+import logging, sys
+from prettytable import PrettyTable
 
 severity_level = logging.INFO
 logger = logging.getLogger(__name__)
@@ -7,52 +8,103 @@ FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 logging.basicConfig(format=FORMAT)
 logger.setLevel(severity_level)
 
+def check_var(var):
+    if not (var in locals()):
+        raise NameError("Mandatory argument not defined.")
+
 def main():
 
-    print("""
-    Select one of the following commands:
+    args = sys.argv
+    logger.debug(f"cmd: {args}")
 
-    1 - Get the password for a specific login.
-    2 - Add a new login and password pair.
-    3 - Change the password for a specific login.
-    4 - Show all saved logins (without passwords).
-    5 - Delete a login from the vault.
-    6 - Print password in the screen.
-    """)
-
-    cmd = int(input("Imput desired command number: "))
-
-    if cmd == 1:
-        guard = VaultGuard()
-        guard.get()
+    try:
+        command = args[1]
+    except IndexError:
+        print("No command selected. Aborting.")
         return
 
-    if cmd == 2:
-        guard = VaultGuard()
-        guard.new()
+    try:
+        service = args[2]
+    except IndexError:
+        pass
+
+    choose_password = False
+    choose_login = False
+    show_all = False
+
+    if "-p" in args:
+        choose_password = True
+    if "-l" in args:
+        choose_login = True
+    if "-a" in args:
+        show_all = True
+
+    if command == 'help':
+
+        print("""
+        Arguments:
+
+        get - Copy the password for a specific login to the clipboard.
+
+        add - Add new credentials.
+
+        change - Change the password for a specific login.
+
+        show - Show all saved services and respective logins (does not show passwords).
+
+        delete - Delete a credential from the vault.
+
+        expose - Show a specific password on the screen.
+        """)
+
         return
 
-    if cmd == 3:
+    try:
+        check_var(service)
+    except NameError:
+        print("service not defined")
+
+    if command == 'get':
+
         guard = VaultGuard()
-        guard.change()
+        guard.get(service)
         return
 
-    if cmd == 4:
+    if command == 'add':
+
         guard = VaultGuard()
-        guard.show()
+        guard.new(service,
+                  choose_login=choose_login,
+                  choose_password=choose_password)
         return
 
-    if cmd == 5:
+    if command == 'change':
+
         guard = VaultGuard()
-        guard.delete()
+        guard.change(service,
+                     choose_password=choose_password)
         return
 
-    if cmd == 6:
+    if command == 'show':
+
         guard = VaultGuard()
-        guard.show_password()
+        guard.show(service,
+                   show_all=show_all)
         return
 
-    print("No command select. Exiting program.")
+    if command == 'delete':
+
+        guard = VaultGuard()
+        guard.delete(service)
+        return
+
+    if command == 'expose':
+
+        guard = VaultGuard()
+        guard.expose(service)
+        return
+
+    print("No command selected. Exiting program.")
 
 if __name__ == "__main__":
     main()
