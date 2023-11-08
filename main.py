@@ -110,7 +110,7 @@ def main():
     if command == 'change_master':
 
         guard = VaultGuard()
-        guard.change_master(service)
+        guard.change_master()
         return
 
     print("No command selected. Exiting program.")
