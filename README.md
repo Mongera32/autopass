@@ -6,4 +6,5 @@ The author of this project makes no guarantees whatsoever about this package and
 # Installation
 
 echo "python3 `echo $PWD`/main.py \$1 \$2 \$3 \$4 \$5" > vault
+
 sudo mv vault /usr/local/bin
