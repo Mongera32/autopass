@@ -55,6 +55,10 @@ def main():
         delete - Delete a credential from the vault.
 
         expose - Show a specific password on the screen.
+
+        delete - Delete a credential from the vault.
+
+        expose - Show a specific password on the screen.
         """)
 
         return
@@ -105,6 +109,7 @@ def main():
         return
 
     print("No command selected. Exiting program.")
+
 
 if __name__ == "__main__":
     main()
