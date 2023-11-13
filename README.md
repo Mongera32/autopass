@@ -8,3 +8,16 @@ This is a personal project that is provided on an as is basis. no warranties or 
 # Installation
 
 To install all requirements and the shell script shortcut for the project, use the `bash /sh-install.txt` in the project root directory.
+
+# Usage
+
+The shell command to call autopass is `vault`. Type `vault add SERVICE_NAME -l` to begin using. SERVICE_NAME is the name of the site or service for which you want to store a password (e.g. e-mail).
+
+## Setup
+
+When first calling the scrip, It will ask for a `master key` input. This the key that it will use for encrypting the file with sensitive data.
+DO NOT forget this key, otherwise you will lose access to all stored data.
+DO NOT write this key anywhere. This would pose security risks.
+
+## 
+
