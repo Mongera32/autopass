@@ -11,13 +11,20 @@ To install all requirements and the shell script shortcut for the project, use t
 
 # Usage
 
-The shell command to call autopass is `vault`. Type `vault add SERVICE_NAME -l` to begin using. SERVICE_NAME is the name of the site or service for which you want to store a password (e.g. e-mail).
+## Quickstart
 
-## Setup
+The shell command to call autopass is `vault`. Type `vault add SERVICE_NAME -l` to begin using. SERVICE_NAME is the name of the site or service for which you want to store a password (e.g. e-mail).
 
 When first calling the scrip, It will ask for a `master key` input. This the key that it will use for encrypting the file with sensitive data.
 DO NOT forget this key, otherwise you will lose access to all stored data.
 DO NOT write this key anywhere. This would pose security risks.
 
-## 
+## Commands
+
+`vault add SERVICE_NAME -l`: stores SERVICE_NAME, asks for a login id, generates a strong password and copies this password to clipboard.
+
+`vault get SERVICE_NAME`: shows login id corresponding to SERVICE_NAME and copies it's password to clipboard.
+
+`vault change SERVICE_NAME`: generates a new password for SERVICE_NAME and copies the new password to clipboard.
+
 
