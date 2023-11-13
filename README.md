@@ -7,4 +7,4 @@ This is a personal project that is provided on an as is basis. no warranties or 
 
 # Installation
 
-To install all requirements and the shell script shortcut for the project, use the following command in the project root directory: `bash /sh-install.txt` 
+To install all requirements and the shell script shortcut for the project, use the `bash /sh-install.txt` in the project root directory.
