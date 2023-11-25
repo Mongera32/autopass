@@ -1,13 +1,13 @@
 # What is this project?
 
-This is a password vault that works locally. It manages your passwords and stores them in a file encrypted using AES (Advanced encryption standard). The main advantage of this is that all encrypted data is stored locally, therefore not relying on internet connection and eliminating risks associated with storing passwords in the cloud.
+This is a password vault that works locally. It manages your passwords and stores them in a file encrypted using AES (Advanced Encryption Standard). The main advantage of this is that all encrypted data is stored locally, therefore not relying on internet connection and eliminating risks associated with storing passwords in the cloud.
 
 DISCLAIMER:
-This is a personal project that is provided on an as is basis. no warranties or representations of any kind, expressed or implied, are given.
+This is a personal project that is provided on an as is basis. No warranties of any kind, expressed or implied, are given.
 
 # Installation
 
-To install all requirements and the shell script shortcut for the project, use the `bash ./sh-install.sh` in the project root directory.
+To install all requirements and the shell script shortcut for the project, go to the project root directory and input `bash ./sh-install.sh` in the shell.
 
 # Usage
 
