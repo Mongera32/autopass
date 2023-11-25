@@ -13,9 +13,8 @@ To install all requirements and the shell script shortcut for the project, go to
 
 ## Quickstart
 
-The shell command to call autopass is `vault`. Type `vault add <SERVICE_NAME> -l` to begin using. SERVICE_NAME is the name of the site or service for which you want to store a password (e.g. e-mail).
+The shell command to call autopass is `vault`. Type `vault add <SERVICE_NAME> -l` to begin using. <SERVICE_NAME> is the name of the site or service for which you want to store a password. **Example**: `vault add e-mail -l`
 
-**example**: `vault add e-mail -l`
   - When you are using *autopass* for the firt time, this will prompt you to create a *master password*. Memorize this password and **DO NOT** forget it, otherwise you will **LOSE ACCESS** to all information stored with no way of getting it back.
   - Then, *autopass* will prompt you to insert your login id for your e-mail (e.g. myname@company.com)
   - Finally, *autopass* will generate a random strong password for this e-mail and store it in the encrypted file. It will be automatically transferred to your clipboard so it doesn't appear on your screen.
